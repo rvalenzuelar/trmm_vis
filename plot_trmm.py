@@ -6,51 +6,35 @@ Raul Valenzuela
 December 2015
 '''
 
-import h5py
 import matplotlib.pyplot as plt
 import numpy as np
+import read_trmm
 
 from mpl_toolkits.basemap import Basemap, cm, shiftgrid
 from datetime import datetime
 
 
-base_directory = '/home/raul/'
+base_dir = '/home/raul/TRMM/'
 
-product='1B01'
-# product='1C21'
+# datef='19971231.00527.7.HDF'
+# datef='19971231.00528.7.HDF'
+# datef='19971223.00405.7.HDF'
+# datef='19980621.03241.7.HDF'
+datef='19980925.04753.7.HDF'
 
-# hfile=base_directory+product+'.19971231.00527.7.h5'
-hfile=base_directory+product+'.19971231.00528.7.h5'
-# hfile=base_directory+product+'.19971223.00405.7.h5'
-# hfile=base_directory+product+'.19971223.00405.7.1.h5'
+# lons,lats,dates,data = read_trmm.retrieve_1B01(base_dir,datef)
 
-f = h5py.File(hfile, 'r')
+# read_trmm.print_dataset_1C21(base_dir,datef)
+# lons,lats,dates,data = read_trmm.retrieve_1C21(base_dir,datef)
 
-swath=f['Swath']
-lats=swath['Latitude'][()]
-lons=swath['Longitude'][()]
+# lons,lats,dates,data = read_trmm.retrieve_2A12(base_dir,datef)
 
+lons,lats,dates,data = read_trmm.retrieve_2A25(base_dir,datef)
 
-lon1D = np.amax(lons,axis=1)
-idxsub = np.where((lon1D>-90)&(lon1D<-60))
-st=idxsub[0][0]
-en=idxsub[0][-1]
-
-channels=swath['channels']
-data=channels[st:en,:,4]
-print np.amin(data)
-data[data<=-9999.]=np.nan
-print np.amin(data)
-
-scantime=swath['ScanTime']
-Yr=scantime['Year'][0]
-Mo=scantime['Month'][0]
-Dy=scantime['DayOfMonth'][0]
-Hr=scantime['Hour'][st:en]
-Mn=scantime['Minute'][st:en]
-date_beg=datetime(Yr,Mo,Dy,Hr[0],Mn[0],0)
-date_end=datetime(Yr,Mo,Dy,Hr[-1],Mn[-1],0)
-
+# print lons.shape
+# print lats.shape
+# print data.shape
+# print data[10:100,:]
 
 ''' create figure and axes instances  '''
 fig = plt.figure(figsize=(8,5))
@@ -85,13 +69,25 @@ m.drawmeridians(meridians,labels=[0,0,0,1],fontsize=10)
 # cbar = m.colorbar(cs,location='bottom',pad="5%")
 
 ''' colormesh '''
-m.pcolormesh(lons[st:en,:], lats[st:en,:], data, latlon=True,cmap='gray')
+# m.pcolormesh(lons[st:en,:], lats[st:en,:], data, latlon=True,cmap='gray')
+# m.pcolormesh(lons, lats, data, latlon=True,cmap='gray')
+vmin=np.floor(np.nanmin(data))
+vmax=np.ceil(np.nanmax(data))
+# m.pcolormesh(lons, lats, data, latlon=True,cmap='gray_r',vmin=vmin, vmax=vmax)
+m.pcolormesh(lons, lats, data, latlon=True,cmap='nipy_spectral',vmin=vmin, vmax=vmax)
 cb = m.colorbar()
 
-plt.suptitle('Date: '+date_beg.strftime('%Y-%b-%d')\
-			+'\nTime: '+date_beg.strftime('%H:%M')+'-'\
-			+date_end.strftime('%H:%M')+' UTC')
+plt.suptitle('Date: '+dates[0].strftime('%Y-%b-%d')\
+			+'\nTime: '+dates[0].strftime('%H:%M')+'-'\
+			+dates[1].strftime('%H:%M')+' UTC')
 
 
+# print data
+# fig,ax=plt.subplots()
+# im=ax.imshow(data,interpolation='none',aspect='auto')
+# plt.colorbar(im)
+# plt.draw()
 
-plt.show()
+# plt.show()
+
+plt.savefig('foo.png', bbox_inches='tight')
