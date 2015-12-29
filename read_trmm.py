@@ -13,26 +13,23 @@ import numpy as np
 
 def retrieve_1B01(*arg):
 	
-	FILE_NAME=arg[0]+'1B01.'+arg[1]
-	hdf = SD(FILE_NAME, SDC.READ)
+	hdf = SD(arg[0], SDC.READ)
 
 	Lon, Lat, date_beg, date_end, st, en = retrieve_ancillary(hdf)
 
 	' calculate brightness temperature from IR channel'
 	'**************************************************'
-
-	' read IR channel'
 	chIR=hdf.select('channels')[st:en,:,4] # [mW cm^-2 micrometer^-1 sr^-1]
 	I = chIR * 1e-3 * (100**2) * 1e6 #[J s^-1 m^-3]
 	wavelength=12e-6 #[m]
 	T=BT(I, wavelength)
-	return 	Lon, Lat,[date_beg,date_end], T
+
+	return 	Lon[st:en,:], Lat[st:en,:],[date_beg,date_end], T
 
 
 def retrieve_1C21(*arg):
 
-	FILE_NAME=arg[0]+'1C21.'+arg[1]
-	hdf = SD(FILE_NAME, SDC.READ)
+	hdf = SD(arg[0], SDC.READ)
 
 	Lon, Lat, date_beg, date_end, st, en = retrieve_ancillary(hdf)
 
@@ -50,12 +47,11 @@ def retrieve_1C21(*arg):
 	# return 	Lon[:,20:31], Lat[:,20:31], [date_beg,date_end], osRain
 
 	data = np.ma.masked_array(data, np.isnan(data))
-	return 	Lon, Lat, [date_beg,date_end], data
+	return 	Lon[st:en,:], Lat[st:en,:], [date_beg,date_end], data
 
 def retrieve_2A12(*arg):
 
-	FILE_NAME=arg[0]+'2A12.'+arg[1]
-	hdf = SD(FILE_NAME, SDC.READ)
+	hdf = SD(arg[0], SDC.READ)
 
 	Lon, Lat, date_beg, date_end, st, en = retrieve_ancillary(hdf)
 
@@ -87,8 +83,7 @@ def retrieve_2A12(*arg):
 
 def retrieve_2A25(*arg):
 
-	FILE_NAME=arg[0]+'2A25.'+arg[1]
-	hdf = SD(FILE_NAME, SDC.READ)
+	hdf = SD(arg[0], SDC.READ)
 
 	Lon, Lat, date_beg, date_end, st, en = retrieve_ancillary(hdf)
 
@@ -115,7 +110,7 @@ def retrieve_2A25(*arg):
 def print_dataset_1B01(*arg):
 
 	FILE_NAME=arg[0]+'1B01.'+arg[1]
-	hdf = SD(FILE_NAME, SDC.READ)
+	hdf = SD(arg[0], SDC.READ)
 
 	'List available SDS datasets'
 	for ds in hdf.datasets():
@@ -157,7 +152,7 @@ def retrieve_ancillary(hdf):
 
 	' find indices of lon corresponding to Chile'
 	lon1D = np.amax(Longitude,axis=1)
-	idxsub = np.where((lon1D>-90)&(lon1D<-60))
+	idxsub = np.where((lon1D >= -90)&(lon1D <= -60))
 	st=idxsub[0][0]
 	en=idxsub[0][-1]
 
