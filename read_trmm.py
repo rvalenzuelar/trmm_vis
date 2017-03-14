@@ -19,10 +19,10 @@ def retrieve_1B01(*arg):
 
 	' calculate brightness temperature from IR channel'
 	'**************************************************'
-	chIR=hdf.select('channels')[st:en,:,4] # [mW cm^-2 micrometer^-1 sr^-1]
+	chIR = hdf.select('channels')[st:en,:,4] # [mW cm^-2 micrometer^-1 sr^-1]
 	I = chIR * 1e-3 * (100**2) * 1e6 #[J s^-1 m^-3]
-	wavelength=12e-6 #[m]
-	T=BT(I, wavelength)
+	wavelength = 12e-6 #[m]
+	T = BT(I, wavelength)
 
 	return 	Lon[st:en,:], Lat[st:en,:],[date_beg,date_end], T
 
