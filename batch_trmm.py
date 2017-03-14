@@ -25,10 +25,13 @@ product = '1B01'
 # 1B01.20021231.29239.7.HDF
 
 def main():
+
     datef = get_filenames(base_dir, product, date)
 
     for f in datef:
         plot_trmm.product(product, f)
+
+    # plot_trmm.fuse(product, datef)
 
 
 def get_filenames(base_dir, product, date):
