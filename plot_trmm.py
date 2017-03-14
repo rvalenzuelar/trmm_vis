@@ -16,6 +16,7 @@ from os.path import basename
 
 
 def product(prod, datef):
+
     if prod == '1B01':
         lons, lats, dates, data = read_trmm.retrieve_1B01(datef)
     elif prod == '1C21':
@@ -51,7 +52,7 @@ def product(prod, datef):
 
     ''' colormesh '''
     if prod == '1B01':
-
+        print lats
         cmap = get_IRcolors()
         m.pcolormesh(lons, lats, data - 273.15, vmin=-70, vmax=30, latlon=True, cmap=cmap)
     else:
@@ -78,7 +79,40 @@ def product(prod, datef):
     plt.savefig(pngname, bbox_inches='tight')
 
 
+def fuse(product,datef):
+
+    from scipy.spatial import cKDTree
+
+    data_list = list()
+    lons_list = list()
+    lats_list = list()
+
+    for f in datef:
+        if prod == '1B01':
+            lons, lats, dates, data = read_trmm.retrieve_1B01(f)
+
+        data_list.extend(data.flatten())
+        lons_list.extend(lons.flatten())
+        lats_list.extend(lats.flatten())
+
+    coords = zip(lons_list, lats_list)
+    tree = cKDTree(coords)
+
+    lon_target = np.linspace(-90,-60,num=100)
+    lat_target = np.linspace(-20,-40,num=100)
+    long, latg = np.meshgrid(lon_target,lat_target)
+
+    loni = long.flatten()
+    lati = latg.flatten()
+    coordsi = zip(loni,lati)
+
+    dist, idx = tree.query(coordsi, k=8, eps=0, p=1, distance_upper_bound=10)
+    kd_mean = np.nanmax(data_list[idx])
+
+
+
 def get_IRcolors():
+
     import matplotlib.pyplot as plt
     import matplotlib.colors as mcolors
 
