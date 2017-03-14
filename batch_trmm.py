@@ -10,29 +10,31 @@ import plot_trmm
 
 from glob import glob
 
-base_dir = '/home/raul/TRMM/'
+base_dir = '/home/rvalenzuela/Data/TRMM/2002'
 
 # date='19980926'
 # date='19980603'
-date='19990628'
+# date='19990628'
 # date='19990629'
+date = '20021231'
 
-product='2A25'
-# product='1B01'
+# product='2A25'
+product = '1B01'
+
+
+# 1B01.20021231.29239.7.HDF
 
 def main():
+    datef = get_filenames(base_dir, product, date)
 
-	datef = get_filenames(base_dir,product,date)
-
-	for f in datef:
-		plot_trmm.product(product,f)
+    for f in datef:
+        plot_trmm.product(product, f)
 
 
-def get_filenames(base_dir,product,date):
+def get_filenames(base_dir, product, date):
+    out = glob(base_dir + '/' + product + '.' + date + '*')
+    out.sort()
+    return out
 
-	
-	out=glob(base_dir+'/'+product+'.'+date+'*')
-	out.sort()
-	return out
 
 main()
