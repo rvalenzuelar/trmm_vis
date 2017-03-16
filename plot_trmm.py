@@ -35,6 +35,8 @@ def product(prod, datef):
     m = Basemap(projection='cyl',
                 llcrnrlat=-40, urcrnrlat=-20,
                 llcrnrlon=-90, urcrnrlon=-60,
+                # llcrnrlat=-50, urcrnrlat=-10,
+                # llcrnrlon=-100, urcrnrlon=-50,
                 # llcrnrlat=-90,urcrnrlat=90,\
                 # llcrnrlon=-180,urcrnrlon=180,\
                 resolution='l')
@@ -52,7 +54,7 @@ def product(prod, datef):
 
     ''' colormesh '''
     if prod == '1B01':
-        print lats
+        # print lats
         cmap = get_IRcolors()
         m.pcolormesh(lons, lats, data - 273.15, vmin=-70, vmax=30, latlon=True, cmap=cmap)
     else:
@@ -88,7 +90,7 @@ def fuse(product,datef):
     lats_list = list()
 
     for f in datef:
-        if prod == '1B01':
+        if product == '1B01':
             lons, lats, dates, data = read_trmm.retrieve_1B01(f)
 
         data_list.extend(data.flatten())
@@ -97,18 +99,48 @@ def fuse(product,datef):
 
     coords = zip(lons_list, lats_list)
     tree = cKDTree(coords)
-
-    lon_target = np.linspace(-90,-60,num=100)
-    lat_target = np.linspace(-20,-40,num=100)
+    cols = 700
+    rows = 500
+    lon_target = np.linspace(-90,-60,num=cols)
+    lat_target = np.linspace(-20,-40,num=rows)
     long, latg = np.meshgrid(lon_target,lat_target)
 
     loni = long.flatten()
     lati = latg.flatten()
     coordsi = zip(loni,lati)
 
-    dist, idx = tree.query(coordsi, k=8, eps=0, p=1, distance_upper_bound=10)
-    kd_mean = np.nanmax(data_list[idx])
+    dist, idx = tree.query(coordsi, k=8, eps=0, p=1, distance_upper_bound=5)
+    ig = np.empty((rows*cols,))
+    data_np = np.array(data_list)
+    for n in range(idx.shape[0]):
+        if np.min(dist[n])>0.2:
+            ig[n] = -9999
+        else:
+            ig[n] = np.nanmin(data_np[idx[n]])
+    mig = np.ma.masked_values(ig,-9999)
+    mig = mig.reshape((rows,cols))
 
+
+    ''' create eq distance cylindrival Basemap instance '''
+    m = Basemap(projection='cyl',
+                llcrnrlat=-40, urcrnrlat=-20,
+                llcrnrlon=-90, urcrnrlon=-60,
+                # llcrnrlat=-90,urcrnrlat=90,\
+                # llcrnrlon=-180,urcrnrlon=180,\
+                resolution='l')
+    ''' draw lines '''
+    m.drawcoastlines()
+    m.drawcountries()
+    ''' draw parallels '''
+    parallels = np.arange(-90., 90, 10.)
+    m.drawparallels(parallels, labels=[1, 0, 0, 0], fontsize=10)
+    ''' draw meridians '''
+    meridians = np.arange(0., 360., 10.)
+    m.drawmeridians(meridians, labels=[0, 0, 0, 1], fontsize=10)
+    ''' color map for IR channel'''
+    cmap = get_IRcolors()
+    ''' plot '''
+    m.pcolormesh(long, latg, mig - 273.15, vmin=-70, vmax=30, latlon=True, cmap=cmap)
 
 
 def get_IRcolors():
