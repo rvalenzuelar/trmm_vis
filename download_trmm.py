@@ -1,7 +1,7 @@
 from glob import glob
 import os
 
-target_date = '20050627'
+target_date = '20020602'
 
 path = '/home/rvalenzuela/download_trmm/*.data'
 files = glob(path)

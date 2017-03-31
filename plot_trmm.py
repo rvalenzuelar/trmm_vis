@@ -146,21 +146,22 @@ def daily_accum2A25(datef):
              datef, beg, end, latg, long)
 
 
+
 def plot_map(product, mig, datef, beg, end, latg, long):
 
     ''' create eq distance cylindrival Basemap instance '''
     fig, ax = plt.subplots()
 
     m = Basemap(projection='cyl',
-                llcrnrlat=-40, urcrnrlat=-20,
-                llcrnrlon=-90, urcrnrlon=-60,
+                llcrnrlat=-45, urcrnrlat=-26,
+                llcrnrlon=-75, urcrnrlon=-69,
                 # llcrnrlat=-90,urcrnrlat=90,\
                 # llcrnrlon=-180,urcrnrlon=180,\
-                resolution='l')
+                resolution='i')
 
     ''' draw lines '''
     m.drawcoastlines()
-    m.drawcountries()
+    m.drawcountries(color=(0.5,0.5,0.5))
     ''' draw parallels '''
     parallels = np.arange(-90., 90, 10.)
     m.drawparallels(parallels, labels=[1, 0, 0, 0], fontsize=10)
@@ -186,9 +187,9 @@ def plot_map(product, mig, datef, beg, end, latg, long):
         if product['2A25'] == 'dBZnearSurf':
             vmin, vmax, titletxt = [-10, 50, 'Relfectivity near surface (dBZ) ']
         elif product['2A25'] == 'rainrate':
-            vmin, vmax, titletxt = [0, 15, 'Rainfall rate (mm/hr) ']
+            vmin, vmax, titletxt = [0, 20, 'Rainfall rate (mm/hr) ']
         elif product['2A25'] == 'accum':
-            vmin, vmax, titletxt = [0, 120, 'Rainfall accumulation ']
+            vmin, vmax, titletxt = [0, 250, 'Rainfall accumulation ']
 
     ''' plot '''
     m.pcolormesh(long, latg, datagrid, vmin=vmin, vmax=vmax,
