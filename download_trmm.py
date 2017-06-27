@@ -3,6 +3,10 @@ import os
 
 target_date = '20020602'
 
+txt = open('/Users/raulvalenzuela/Documents/stratus')
+passw = txt.read().rstrip()
+txt.close()
+
 path = '/home/rvalenzuela/download_trmm/*.data'
 files = glob(path)
 index = [i for i,s in enumerate(files) if target_date[:4] in s]
@@ -14,7 +18,7 @@ with open(files[index[0]],'r') as file:
             list_target.append(line[:-1])
 
 outdir = '/home/rvalenzuela/Data/new_TRMM/'
-auth = ' --user rvalenzuela --password earthData2017#'
+auth = ' --user rvalenzuela --password {}'.format(passw)
 
 # C21=[s for s in list_target if '1C21' in s]
 
